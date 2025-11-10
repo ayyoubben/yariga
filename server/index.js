@@ -9,11 +9,24 @@ import propertyRouter from './routes/property.routes.js'
 dotenv.config()
 
 const app = express()
+
+const allowedOrigins = ['https://yarigaben.netlify.app'];
+
 app.use(cors({
-  origin: "https://yarigaben.netlify.app/",
-  methods: ["GET","POST"],
-  credentials: true
-}))
+  origin: function(origin, callback){
+    // allow requests with no origin (like Postman, server-to-server)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,  // if using cookies or auth headers
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+}));
+
+
 app.use(express.json({limit: '50mb'}))
 
 app.get('/', (req, res) => {
